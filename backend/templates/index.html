@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Plant Disease Detector</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .section { margin-bottom: 30px; }
+  </style>
+</head>
+<body>
+
+  <h1>Plant Disease Detection</h1>
+
+  <div class="section">
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label>Select Plant Image:</label>
+      <input type="file" name="file" required />
+      <button type="submit">Predict</button>
+    </form>
+    <div id="prediction"></div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h2>Chat with the Bot</h2>
+    <div id="chatBox" style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;"></div>
+    <input type="text" id="userInput" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    document.getElementById('uploadForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const res = await fetch('/predict', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      document.getElementById('prediction').innerText = 
+        `Prediction: ${data.prediction}, Treatment: ${data.treatment}`;
+    };
+
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const message = input.value;
+      input.value = '';
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: message })
+    });
+      const data = await res.json();
+      const chatBox = document.getElementById('chatBox');
+      chatBox.innerHTML += `<p><b>You:</b> ${message}</p>`;
+      chatBox.innerHTML += `<p><b>Bot:</b> ${data.response}</p>`;
+    }
+  </script>
+
+</body>
+</html>
